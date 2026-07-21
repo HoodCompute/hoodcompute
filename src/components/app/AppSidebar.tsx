@@ -63,7 +63,7 @@ const NAV = [
   },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -75,14 +75,26 @@ export function AppSidebar() {
   }
 
   return (
-    <aside
-      className="flex h-full w-[224px] shrink-0 flex-col overflow-hidden rounded-2xl border"
-      style={{
-        background: "var(--surface-dark-2)",
-        borderColor: "oklch(1 0 0 / 0.08)",
-        boxShadow: "0 1px 3px oklch(0 0 0 / 0.35)",
-      }}
-    >
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-full w-[248px] shrink-0 flex-col overflow-hidden border-r transition-transform duration-200",
+          "md:static md:z-auto md:w-[224px] md:translate-x-0 md:rounded-2xl md:border md:transition-none",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+        style={{
+          background: "var(--surface-dark-2)",
+          borderColor: "oklch(1 0 0 / 0.08)",
+          boxShadow: "0 1px 3px oklch(0 0 0 / 0.35)",
+        }}
+      >
       {/* Logo */}
       <div
         className="flex h-[60px] items-center gap-2.5 border-b px-5"
@@ -90,6 +102,16 @@ export function AppSidebar() {
       >
         <Image src="/images/logo.png" alt="HoodCompute" width={100} height={100} className="h-10 w-10 object-contain" />
         <span className="text-[24px] font-heading text-white">HoodCompute</span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close menu"
+          className="ml-auto flex h-8 w-8 items-center justify-center rounded-[6px] text-white/40 transition hover:bg-white/[0.06] hover:text-white/80 md:hidden"
+        >
+          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
 
       {/* Nav */}
@@ -107,6 +129,7 @@ export function AppSidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={onClose}
                   className={cn(
                     "flex items-center gap-3 rounded-[6px] px-2.5 py-2 text-[14px] transition-colors",
                     active
@@ -141,6 +164,7 @@ export function AppSidebar() {
           Sign out
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

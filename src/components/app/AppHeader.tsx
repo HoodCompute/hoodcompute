@@ -14,20 +14,32 @@ const TITLES: Record<string, { title: string; description: string }> = {
   "/app/policies":     { title: "Policies",   description: "Spending rules applied to your agent wallets." },
 };
 
-export function AppHeader() {
+export function AppHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
   const meta = TITLES[pathname] ?? { title: "", description: "" };
   const { credits, loading } = useCredits();
 
   return (
-    <header className="flex h-[52px] shrink-0 items-center justify-between px-2">
+    <header className="flex h-[52px] shrink-0 items-center justify-between gap-2 px-1 sm:px-2">
 
-      <div>
-        <h1 className="text-[15px] font-[500] text-white">{meta.title}</h1>
-        <p className="text-[12px] text-white/35">{meta.description}</p>
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-white/50 transition hover:bg-white/[0.06] hover:text-white/80 md:hidden"
+        >
+          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
+            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate text-[15px] font-[500] text-white">{meta.title}</h1>
+          <p className="hidden truncate text-[12px] text-white/35 sm:block">{meta.description}</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {/* Credits pill */}
         <div
           className="flex items-center gap-2 rounded-full px-3 py-1.5"
@@ -42,7 +54,7 @@ export function AppHeader() {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex h-8 w-8 items-center justify-center rounded-[6px] text-white/30 transition hover:bg-white/[0.06] hover:text-white/70"
+          className="relative hidden h-8 w-8 items-center justify-center rounded-[6px] text-white/30 transition hover:bg-white/[0.06] hover:text-white/70 sm:flex"
         >
           <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
             <path d="M10 2a5 5 0 0 1 5 5v2l1.5 3H3.5L5 9V7a5 5 0 0 1 5-5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />

@@ -42,10 +42,10 @@ export function Nav() {
       className="fixed top-4 left-1/2 -translate-x-1/2 z-[1025] w-[calc(100%-2rem)] max-w-[1200px] rounded-2xl border border-white/10 bg-[var(--surface-dark-2)] shadow-lg shadow-black/40"
       aria-label="Main navigation"
     >
-      <div className="mx-auto flex h-[64px] max-w-[1200px] justify-center items-center px-6">
-        <Link href="/" aria-label="HoodCompute home" className="inline-flex shrink-0 left-6 items-center gap-3 absolute">
-          <Image src="/images/logo.png" alt="HoodCompute" width={200} height={200} className="h-12 w-12 object-contain" priority />
-          <span className="text-[26px] tracking-tight font-heading text-white">HoodCompute</span>
+      <div className="mx-auto flex h-[64px] max-w-[1200px] justify-center items-center px-4 sm:px-6">
+        <Link href="/" aria-label="HoodCompute home" className="inline-flex shrink-0 left-4 sm:left-6 items-center gap-2 sm:gap-3 absolute">
+          <Image src="/images/logo.png" alt="HoodCompute" width={200} height={200} className="h-10 w-10 sm:h-12 sm:w-12 object-contain" priority />
+          <span className="hidden sm:inline text-[26px] tracking-tight font-heading text-white">HoodCompute</span>
         </Link>
 
         <ul className="hidden items-center gap-10 lg:flex">
@@ -61,13 +61,13 @@ export function Nav() {
           ))}
         </ul>
 
-        <div className="ml-auto absolute right-6 flex items-center gap-6">
+        <div className="ml-auto absolute right-4 sm:right-6 flex items-center gap-3 sm:gap-6">
           {signedIn ? (
             <>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="rounded-[4px] py-2 text-[15px] font-[440] text-white/60 transition-colors hover:text-white"
+                className="hidden sm:block rounded-[4px] py-2 text-[15px] font-[440] text-white/60 transition-colors hover:text-white"
               >
                 Sign out
               </button>
@@ -80,7 +80,7 @@ export function Nav() {
             <>
               <Link
                 href="/app"
-                className="rounded-[4px] py-2 text-[15px] font-[440] text-white/60 transition-colors hover:text-white"
+                className="hidden sm:block rounded-[4px] py-2 text-[15px] font-[440] text-white/60 transition-colors hover:text-white"
               >
                 Sign in
               </Link>

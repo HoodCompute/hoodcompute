@@ -86,8 +86,8 @@ export function StatsCarousel() {
 
 function StatCell({ stat, index }: { stat: Stat; index: number }) {
   const sizing = stat.featured
-    ? "min-h-[180px] grow basis-full p-7 lg:basis-[calc(50%-0.75rem)]"
-    : "min-h-[150px] grow basis-[calc(50%-0.375rem)] p-6 lg:basis-[220px]";
+    ? "min-h-[160px] sm:min-h-[180px] grow basis-full p-6 sm:p-7 lg:basis-[calc(50%-0.75rem)]"
+    : "min-h-[130px] sm:min-h-[150px] grow basis-[calc(50%-0.375rem)] p-5 sm:p-6 lg:basis-[220px]";
 
   return (
     <article
@@ -105,10 +105,10 @@ function StatCell({ stat, index }: { stat: Stat; index: number }) {
         <div
           className={`font-mono leading-[0.95] tracking-[-0.02em] tabular-nums whitespace-nowrap ${
             stat.featured
-              ? "text-[72px] text-[var(--gold)] sm:text-[88px] lg:text-[104px]"
+              ? "text-[64px] text-[var(--gold)] sm:text-[88px] lg:text-[104px]"
               : stat.compact
-                ? "text-[26px] text-white sm:text-[30px] lg:text-[32px]"
-                : "text-[40px] text-white lg:text-[48px]"
+                ? "text-[22px] text-white sm:text-[30px] lg:text-[32px]"
+                : "text-[26px] text-white sm:text-[40px] lg:text-[48px]"
           }`}
         >
           {stat.value}

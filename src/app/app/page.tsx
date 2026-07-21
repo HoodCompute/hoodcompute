@@ -115,10 +115,10 @@ export default function DashboardPage() {
   const statsLoading = loading || creditsLoading;
 
   return (
-    <div className="p-6 space-y-6 max-w-[1200px]">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-[1200px]">
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {[
           {
             label: "Credits balance",
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y" style={{ borderColor: "oklch(1 0 0 / 0.06)" }}>
               {jobs.map((job) => (
-                <div key={job.id} className="flex items-center gap-3 px-5 py-3 transition hover:bg-white/[0.02]">
+                <div key={job.id} className="flex flex-col gap-2 px-4 py-3 transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:gap-3 sm:px-5">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-[500] text-white truncate">{job.model_name}</span>
@@ -248,11 +248,11 @@ export default function DashboardPage() {
                       {job.tx_hash ? `tx: ${job.tx_hash.slice(0, 14)}...` : "Awaiting settlement"}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex flex-wrap items-center gap-3 shrink-0 sm:gap-4">
                     <span className="font-mono text-[12px] text-white/40">{job.output_tokens} tok</span>
                     <span className="font-mono text-[12px] font-[500] text-white/70">{job.credits_charged} cr</span>
                     <StatusBadge status={job.status} />
-                    <span className="text-[11px] text-white/25 w-14 text-right">{timeAgo(job.created_at)}</span>
+                    <span className="text-[11px] text-white/25 sm:w-14 sm:text-right">{timeAgo(job.created_at)}</span>
                   </div>
                 </div>
               ))}
