@@ -17,8 +17,8 @@ export const DEFAULT_TIMEOUT_MS = 120_000
 /** Default number of automatic retries on transient failures. */
 export const DEFAULT_MAX_RETRIES = 2
 
-/** SDK version, surfaced in the User-Agent header. */
-export const SDK_VERSION = "0.1.0"
+/** SDK version, surfaced in the User-Agent header. Keep in sync with package.json. */
+export const SDK_VERSION = "0.2.2"
 
 /**
  * Build a Blockscout explorer link for a Robinhood Chain transaction hash.
