@@ -87,6 +87,11 @@ export class NotFoundError extends HoodComputeError {
 
 /** 429. The request rate to the API is too high. Back off and retry. */
 export class RateLimitError extends HoodComputeError {
+  /** Suggested seconds to wait before retrying, when the API provides one. */
+  get retryAfter(): number | undefined {
+    const value = this.details?.retry_after
+    return typeof value === "number" ? value : undefined
+  }
   constructor(...args: ConstructorParameters<typeof HoodComputeError>) {
     super(...args)
     this.name = "RateLimitError"

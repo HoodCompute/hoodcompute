@@ -154,4 +154,54 @@ describe("HttpClient retries", () => {
     await assertion
     expect(fetchImpl).toHaveBeenCalledTimes(2)
   })
+
+  it("does not retry a request aborted by the caller", async () => {
+    const controller = new AbortController()
+    const fetchImpl = vi.fn(async () => {
+      controller.abort()
+      throw new DOMException("The operation was aborted.", "AbortError")
+    }) as unknown as typeof fetch
+
+    const client = makeClient(fetchImpl)
+    await expect(
+      client.request({ path: "/account", signal: controller.signal }),
+    ).rejects.toThrow(/aborted by caller/i)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not issue the request at all when the signal is already aborted", async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const fetchImpl = vi.fn(async (_url: string, init: RequestInit) => {
+      if (init.signal?.aborted) {
+        throw new DOMException("The operation was aborted.", "AbortError")
+      }
+      return json(200, { ok: true })
+    }) as unknown as typeof fetch
+
+    const client = makeClient(fetchImpl)
+    await expect(
+      client.request({ path: "/account", signal: controller.signal }),
+    ).rejects.toThrow(/aborted by caller/i)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it("waits for the Retry-After header before retrying a 429", async () => {
+    vi.useFakeTimers()
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(json(429, { message: "slow down" }, { "retry-after": "1" }))
+      .mockResolvedValueOnce(json(200, { ok: true })) as unknown as typeof fetch
+
+    const client = makeClient(fetchImpl)
+    const pending = client.request<{ ok: boolean }>({ path: "/account" })
+
+    await vi.advanceTimersByTimeAsync(999)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(1)
+    const { data } = await pending
+
+    expect(data).toEqual({ ok: true })
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+  })
 })

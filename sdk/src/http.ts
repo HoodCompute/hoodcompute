@@ -93,6 +93,8 @@ export class HttpClient {
         }
         throw error
       } catch (err) {
+        // An abort from the caller is a deliberate cancellation, never retried.
+        if (options.signal?.aborted) throw err
         if (err instanceof ConnectionError && attempt < this.maxRetries) {
           lastError = err
           await sleep(this.backoff(attempt))
@@ -117,7 +119,12 @@ export class HttpClient {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), this.timeout)
     const onAbort = () => controller.abort()
-    userSignal?.addEventListener("abort", onAbort, { once: true })
+    // A signal that is already aborted never fires its "abort" event again.
+    if (userSignal?.aborted) {
+      controller.abort()
+    } else {
+      userSignal?.addEventListener("abort", onAbort, { once: true })
+    }
 
     try {
       return await this.fetchImpl(url, { ...init, signal: controller.signal })
@@ -143,6 +150,18 @@ export class HttpClient {
     } catch {
       body = undefined
     }
+
+    // Surface a standard Retry-After header through `details.retry_after` when
+    // the body itself does not carry one, so the retry loop and callers see a
+    // single source of truth.
+    const retryAfterHeader = response.headers.get("retry-after")
+    if (retryAfterHeader !== null && typeof body?.details?.retry_after !== "number") {
+      const seconds = Number(retryAfterHeader)
+      if (Number.isFinite(seconds) && seconds >= 0) {
+        body = { ...body, details: { ...body?.details, retry_after: seconds } }
+      }
+    }
+
     const requestId = response.headers.get("x-request-id") ?? undefined
     return errorFromResponse(response.status, body, requestId)
   }
@@ -180,7 +199,8 @@ export class HttpClient {
         ? ((error as { details: Record<string, unknown> }).details.retry_after as number) * 1000
         : undefined
     if (retryAfter !== undefined) return retryAfter
-    return Math.min(1000 * 2 ** attempt, 8000)
+    // Full jitter keeps simultaneous clients from retrying in lockstep.
+    return Math.min(1000 * 2 ** attempt, 8000) * (0.5 + Math.random() * 0.5)
   }
 }
 
