@@ -1,16 +1,16 @@
 {
   "name": "@hoodcompute/sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Typed TypeScript SDK for the HoodCompute decentralized AI inference network. OpenAI-compatible chat completions with on-chain settlement receipts on Robinhood Chain.",
   "license": "MIT",
   "author": "HoodCompute",
   "homepage": "https://hoodcompute.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hoodcompute/hoodcompute-app.git"
+    "url": "https://github.com/hoodcompute/hoodcompute.git"
   },
   "bugs": {
-    "url": "https://github.com/hoodcompute/hoodcompute-app/issues"
+    "url": "https://github.com/hoodcompute/hoodcompute/issues"
   },
   "keywords": [
     "hoodcompute",
