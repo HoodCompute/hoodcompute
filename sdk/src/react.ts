@@ -43,6 +43,8 @@ export interface UseHoodComputeChatOptions {
 export interface UseHoodComputeChatResult {
   /** Send a user message and stream the assistant reply into `messages`. */
   send: (message: string) => Promise<void>
+  /** Abort the in-flight request, keeping whatever streamed so far. */
+  stop: () => void
   /** The running conversation. */
   messages: ChatMessage[]
   /** Current status of the hook. */
@@ -87,25 +89,41 @@ export function useHoodComputeChat(
   const callbacks = useRef({ onComplete, onError })
   callbacks.current = { onComplete, onError }
 
+  // Mirror `messages` in a ref so `send` always reads the current history,
+  // even when called twice before React re-renders.
+  const messagesRef = useRef(messages)
+  messagesRef.current = messages
+
+  const abortRef = useRef<AbortController | null>(null)
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort()
+  }, [])
+
   const send = useCallback(
     async (message: string) => {
+      // One request at a time: a new send cancels the previous stream.
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
       setError(null)
       setStatus("streaming")
 
       const userMessage: ChatMessage = { role: "user", content: message }
-      const history = [...messages, userMessage]
-      setMessages((prev) => [...prev, userMessage, { role: "assistant", content: "" }])
+      const history = [...messagesRef.current, userMessage]
+      messagesRef.current = [...history, { role: "assistant", content: "" }]
+      setMessages(messagesRef.current)
 
       const outbound: ChatMessage[] = systemPrompt
         ? [{ role: "system", content: systemPrompt }, ...history]
         : history
 
       try {
-        const stream = await client.chat.completions.create({
-          model,
-          messages: outbound,
-          stream: true,
-        })
+        const stream = await client.chat.completions.create(
+          { model, messages: outbound, stream: true },
+          { signal: controller.signal },
+        )
 
         for await (const chunk of stream) {
           const delta = chunk.choices[0]?.delta?.content
@@ -132,21 +150,31 @@ export function useHoodComputeChat(
         callbacks.current.onComplete?.(receipt)
         setStatus("idle")
       } catch (err) {
+        // A deliberate stop (or a newer send taking over) is not an error.
+        if (controller.signal.aborted) {
+          if (abortRef.current === controller) setStatus("idle")
+          return
+        }
         const normalized = err instanceof Error ? err : new Error(String(err))
         setError(normalized)
         setStatus("error")
         callbacks.current.onError?.(normalized)
+      } finally {
+        if (abortRef.current === controller) abortRef.current = null
       }
     },
-    [client, model, messages, systemPrompt],
+    [client, model, systemPrompt],
   )
 
   const reset = useCallback(() => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    messagesRef.current = []
     setMessages([])
     setStatus("idle")
     setError(null)
     setLastReceipt(null)
   }, [])
 
-  return { send, messages, status, balance, lastReceipt, error, reset }
+  return { send, stop, messages, status, balance, lastReceipt, error, reset }
 }
